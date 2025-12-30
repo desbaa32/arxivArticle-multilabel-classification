@@ -1,0 +1,70 @@
+project:
+  name: arxivArticle-multilabel-classification
+  version: 1.0.0
+  description: Multi-label classification of scientific articles using PySpark
+
+spark:
+  app_name: ArXivArticle-Classification'
+  master: "local[*]"  # Remplacer par cluster URL en production
+  memory: 4g
+  executor_memory: 2g
+  driver_memory: 2g
+  cores_per_executor: 4
+  num_executors: 2
+  
+data:
+  raw_path: data/raw
+  processed_path: data/processed
+  models_path: data/models
+  sample_size: 0.1  # Pour développement rapide
+  
+preprocessing:
+  # Text preprocessing
+  lowercase: true
+  remove_urls: true
+  remove_special_chars: true
+  remove_numbers: false
+  
+  # TF-IDF parameters
+  min_df: 5               # Min document frequency
+  max_df: 0.8            # Max document frequency (0.8 = 80%)
+  vocab_size: 10000
+  
+  # Split configuration
+  train_size: 0.7
+  val_size: 0.15
+  test_size: 0.15
+  random_state: 42
+  
+modeling:
+  random_state: 42
+  num_partitions: 4
+  
+  # Model hyperparameters
+  logistic_regression:
+    max_iter: 100
+    reg_param: 0.01
+    elasticnet_param: 0.5
+    
+  random_forest:
+    num_trees: 100
+    max_depth: 10
+    min_instances_per_node: 5
+    
+  gradient_boosting:
+    num_iterations: 100
+    max_depth: 5
+    learning_rate: 0.1
+  
+
+evaluation:
+  # Thresholds pour multi-label predictions
+  decision_threshold: 0.5
+  
+  # Métriques à calculer
+  metrics:
+    - f1_score
+    - precision
+    - recall
+    - accuracy
+    - hamming_loss
