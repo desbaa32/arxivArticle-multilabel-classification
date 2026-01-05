@@ -1,0 +1,31 @@
+# DONNÉES VOLUMINEUSES - NE PAS COMMITER
+data/raw/
+data/processed/
+data/interim/
+*.parquet
+*.json
+*.csv
+*.pkl
+*.joblib
+*.h5
+*.model
+
+# MODÈLES
+models/
+
+# LOGS ET TEMPORAIRES
+logs/
+temp/
+tmp/
+*.log
+
+# ENVIRONNEMENTS
+venv/
+.env
+.venv/
+
+# CACHE ET BUILD
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.spark/
