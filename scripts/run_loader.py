@@ -30,9 +30,8 @@ def main():
     
     args = parser.parse_args()
     
-    print("="*60)
+    print("="*20)
     print(" SCRIPT DE CHARGEMENT DES DONNÉES ARXIV")
-    print("="*60)
     
     try:
         # 1. Charger la configuration
