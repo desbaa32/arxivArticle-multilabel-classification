@@ -6,6 +6,8 @@ from pyspark.ml.feature import (
 from pyspark.ml import Pipeline
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
+from pyspark.ml.linalg import VectorUDT, Vectors
+from pyspark.sql.functions import udf
 
 class FeatureEngineer:
     """Ingénierie des features pour le texte"""
@@ -132,12 +134,11 @@ class FeatureEngineer:
             )
         
         return df
-    
     def combine_features(self, df, feature_columns=None):
         """
-        Combine toutes les features en un vecteur
+        Combine toutes les features en un vecteur ML-compatible
         """
-        print(" Combinaison des features")
+        print("⚙️ Combinaison des features")
         
         # Colonnes par défaut
         if feature_columns is None:
@@ -154,18 +155,112 @@ class FeatureEngineer:
         
         print(f" Features à combiner: {existing_columns}")
         
-        # Assembler
+        # Assembler avec handleInvalid
         assembler = VectorAssembler(
             inputCols=existing_columns,
-            outputCol="features",
+            outputCol="features_raw",
             handleInvalid="skip"
         )
         
         df_features = assembler.transform(df)
         
-        print(f"Vecteur de features créé ({len(existing_columns)} dimensions)")
+        # ============================================
+        # CORRECTION: S'assurer que c'est le bon type
+        # ============================================
+        
+        
+        # Vérifier le type actuel
+        schema_type = df_features.schema["features_raw"].dataType
+        
+        if isinstance(schema_type, VectorUDT):
+            # Déjà le bon type - juste renommer
+            df_features = df_features.withColumnRenamed("features_raw", "features")
+            print("Type de vecteur correct (VectorUDT)")
+        else:
+            # Conversion nécessaire
+            print(f"Type incorrect détecté: {type(schema_type).__name__}")
+            print("Conversion en VectorUDT en cours...")
+            
+            def fix_vector(v):
+                """Convertit n'importe quel format en VectorUDT"""
+                if v is None:
+                    return None
+                try:
+                    # Si c'est déjà un vecteur ML
+                    if hasattr(v, 'toArray'):
+                        return v
+                    
+                    # Si c'est un Row/Struct avec asDict()
+                    if hasattr(v, 'asDict'):
+                        d = v.asDict()
+                        if d.get('type') == 0:  # Dense vector
+                            return Vectors.dense(d['values'])
+                        else:  # Sparse vector
+                            return Vectors.sparse(int(d['size']), 
+                                                list(d['indices']), 
+                                                list(d['values']))
+                    
+                    # Si c'est un dict
+                    if isinstance(v, dict):
+                        if v.get('type') == 0:
+                            return Vectors.dense(v['values'])
+                        else:
+                            return Vectors.sparse(int(v['size']), 
+                                                list(v['indices']), 
+                                                list(v['values']))
+                    
+                    # Par défaut, essayer de créer un vecteur dense
+                    return Vectors.dense(v)
+                    
+                except Exception as e:
+                    print(f"❌ Erreur conversion vecteur: {e}")
+                    return None
+            
+            # Créer l'UDF avec le bon type de retour
+            fix_udf = udf(fix_vector, VectorUDT())
+            
+            # Appliquer la conversion
+            df_features = df_features.withColumn("features", fix_udf("features_raw"))
+            df_features = df_features.drop("features_raw")
+            print(" Conversion terminée")
+        
+        print(f" Vecteur de features créé ({len(existing_columns)} dimensions)")
         
         return df_features
+
+    # def combine_features(self, df, feature_columns=None):
+    #     """
+    #     Combine toutes les features en un vecteur
+    #     """
+    #     print(" Combinaison des features")
+        
+    #     # Colonnes par défaut
+    #     if feature_columns is None:
+    #         feature_columns = [
+    #             "tfidf_features",
+    #             "text_length",
+    #             "word_count",
+    #             "avg_word_length",
+    #             "unique_ratio"
+    #         ]
+        
+    #     # Garder seulement les colonnes qui existent
+    #     existing_columns = [col for col in feature_columns if col in df.columns]
+        
+    #     print(f" Features à combiner: {existing_columns}")
+        
+    #     # Assembler
+    #     assembler = VectorAssembler(
+    #         inputCols=existing_columns,
+    #         outputCol="features",
+    #         handleInvalid="skip"
+    #     )
+        
+    #     df_features = assembler.transform(df)
+        
+    #     print(f"Vecteur de features créé ({len(existing_columns)} dimensions)")
+        
+    #     return df_features
     
     def run_full_feature_engineering(self, df, text_col="combined_text"):
         """

@@ -6,7 +6,17 @@ from src import (
    # TextPreprocessor,
     DataPreprocessor,
     DataLoaderExploration,
-    FeatureEngineer
+    FeatureEngineer,
+    BinaryRelevanceModel,
+    ClassifierChainsModel,
+    DataVisualizer,
+    ModelEvaluator,
+    MultiLabelMetrics,
+    # visualisation
+    
 )
 from src.utils import Config
-__all__ = ["DataLoaderExploration","Config","DataPreprocessor","FeatureEngineer"]
+__all__ = ["DataLoaderExploration","Config","DataPreprocessor",
+           "FeatureEngineer","ClassifierChainsModel","BinaryRelevanceModel",
+           "DataVisualizer","ModelEvaluator","MultiLabelMetrics",
+          ]

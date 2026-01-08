@@ -10,17 +10,21 @@ from .data import (
     DataLoaderExploration
 )
 
-# from .features.feature_engineering import (
-#     FeatureEngineer,
+from .features import (
+    FeatureEngineer
 #     FeaturePipeline
-# )
+)
 
-# from .models.binary_relevance_model import BinaryRelevanceModel
-# from .models.classifier_chains_model import ClassifierChainsModel
+from .models import (
+    BinaryRelevanceModel,
+    ClassifierChainsModel
+)
 
-# from .utils.evaluation_metrics import MultiLabelEvaluator
+from .utils import (
+    MultiLabelMetrics,
+    ModelEvaluator,
+    DataVisualizer)
 # from .utils.spark_utils import create_spark_session
-
 # Liste des modules exportables
 __all__ = [
     # Data
@@ -28,15 +32,17 @@ __all__ = [
     "DataPreprocessor",
     "DataLoaderExploration",
     
-    # # Features
-    # "FeatureEngineer",
+     # Features
+    "FeatureEngineer",
     # "FeaturePipeline",
     
-    # # Models
-    # "BinaryRelevanceModel",
-    # "ClassifierChainsModel",
+     # Models
+    "BinaryRelevanceModel",
+    "ClassifierChainsModel",
     
     # # Utils
-    # "MultiLabelEvaluator",
+    "MultiLabelMetrics",
+    "ModelEvaluator",
+    "DataVisualizer",
     # "create_spark_session",
 ]

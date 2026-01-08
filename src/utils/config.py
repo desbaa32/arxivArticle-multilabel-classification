@@ -34,6 +34,7 @@ class Config:
             'data': {
                 'raw_path': 'data/raw/arxiv-metadata-oai-snapshot.json',
                 'processed_path': 'data/processed/',
+                'models_path': 'data/models',
                 'sample_size': 50000,
                 'top_categories': 30
             }
@@ -53,15 +54,18 @@ class Config:
         }
     def _setup_paths(self):
         """Crée les répertoires nécessaires"""
+        # Lire le chemin des modèles depuis la configuration
+        models_path = self.config.get('data', {}).get('models_path', 'data/models')
+        
         paths = [
             'data/processed',
             'data/interim',
-            'models',
+            models_path,  # Utiliser le chemin configuré
             'logs',
             'reports/figures',
             'reports/tables'
         ]
-        
+    
         for path in paths:
             os.makedirs(path, exist_ok=True)
     
@@ -72,7 +76,9 @@ class Config:
     def get_data_config(self):
         """Retourne la configuration des données"""
         return self.config.get('data', {})
-    
+    def get_models_path(self):
+        """Retourne le chemin des modèles depuis la configuration"""
+        return self.config.get('data', {}).get('models_path', 'data/models')
     def get_model_config(self, model_type):
         """Retourne la configuration d'un modèle spécifique"""
         models_config = self.config.get('models', {})

@@ -1,0 +1,25 @@
+def _ensure_vector_features(self, df, features_col="features"):
+        """
+        Vérifie que la colonne features est bien un vecteur Spark MLlib.
+        Si ce n'est pas le cas, tente de la convertir.
+        """
+        from pyspark.sql.types import StructType
+
+        # Vérifier le type de la colonne
+        field = df.schema[features_col]
+        if isinstance(field.dataType, VectorUDT):
+            return df  # Déjà un vecteur, rien à faire
+
+        # Si c'est un StructType (cas de l'erreur)
+        if isinstance(field.dataType, StructType):
+            # Définir une UDF pour convertir le struct en vecteur
+            def struct_to_vector(struct):
+                return Vectors.sparse(struct["size"], struct["indices"], struct["values"])
+
+            struct_to_vector_udf = udf(struct_to_vector, VectorUDT())
+            df = df.withColumn(features_col, struct_to_vector_udf(df[features_col]))
+
+        return df
+    from pyspark.sql.functions import udf
+from pyspark.ml.linalg import Vectors, VectorUDT
+from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType, DoubleType

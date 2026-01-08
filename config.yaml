@@ -16,7 +16,7 @@ data:
   raw_path:  "data/raw/arxiv-metadata-oai-snapshot.json"
   processed_path: "data/processed/"
   models_path: data/models
-  sample_size: 100000  # Pour tests rapides
+  sample_size: 50000  # Pour tests rapides
   top_categories: 30   # Pour développement rapide
   
 preprocessing:
